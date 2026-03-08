@@ -11,9 +11,21 @@ return Application::configure(basePath: dirname(__DIR__))
         api: __DIR__.'/../routes/api.php',
         health: '/up',
     )
-    ->withMiddleware(function (Middleware $middleware): void {
-        //
+    ->withMiddleware(function ($middleware) {
+
+        $middleware->alias([
+            'role' => \App\Http\Middleware\RoleMiddleware::class,
+        ]);
+
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+
+        $exceptions->render(function (\Illuminate\Auth\AuthenticationException $e, $request) {
+            if ($request->is('api/*')) {
+                return response()->json([
+                    'message' => 'No autenticado'
+                ], 401);
+            }
+        });
+
     })->create();
